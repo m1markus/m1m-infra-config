@@ -25,6 +25,7 @@ public class MutinyTest {
     void testStreamUni() {
         Uni<String> uni = Uni.createFrom().item(1)
                 .onItem().transform(i -> "hello-" + i)
+                // delayRequestForSeconds
                 .onItem().delayIt().by(Duration.ofSeconds(5));
 
         System.out.println("calling subscribe() ...");

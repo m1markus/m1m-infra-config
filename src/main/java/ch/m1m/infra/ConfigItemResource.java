@@ -10,6 +10,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.jboss.resteasy.reactive.RestQuery;
 import org.jboss.resteasy.reactive.RestResponse;
+import org.jboss.resteasy.reactive.RestResponse.ResponseBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,11 +60,13 @@ public class ConfigItemResource {
                     } else {
                         item = item + "-item-" + atomicInteger.incrementAndGet();
                     }
-                    return RestResponse.ResponseBuilder.ok(item, MediaType.TEXT_PLAIN_TYPE)
+                    return ResponseBuilder.ok(item, MediaType.TEXT_PLAIN_TYPE)
                             //.status(Response.Status.NO_CONTENT)
                             .status(Response.Status.OK)
                             .build();
-                });
+                })
+                .onItem().invoke(item -> log.info("toto END-1"))
+                .log("toto END-2");
 
         //.onItem().delayIt().by(delayRequestForMillis);
         //return Uni.createFrom().item("toto");

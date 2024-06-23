@@ -14,7 +14,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Singleton
 public class UpdateNotifier {
 
-    private Map<String, PollMapEntry> pendingPollRequests = new ConcurrentHashMap<>();
+    private final Map<String, PollMapEntry> pendingPollRequests = new ConcurrentHashMap<>();
 
     @PostConstruct
     public void onInit() {
@@ -22,16 +22,18 @@ public class UpdateNotifier {
     }
 
     @Scheduled(every = "1s")
-    public void notifyWaitingClients() {
-        log.info("ChangeNotifier notifyWaitingClients()");
-
+    public void simulateNotifyWaitingClients() {
+        log.info("ChangeNotifier simulateNotifyWaitingClients()");
         String domain = "it-ch";
         String application = "batch";
+        notifyWaitingClients(domain, application);
+    }
+
+    public void notifyWaitingClients(final String domain, final String application) {
         String updateForApplicationKey = generateRegisterKey(domain, application);
-
-        // check if there is one or more clients to notify about an update
-
+        log.info("ChangeNotifier notifyWaitingClients() for application={}", updateForApplicationKey);
         log.info("notify pendingPollRequests size={}", pendingPollRequests.size());
+
         pendingPollRequests.forEach((key, pollMapEntry) -> {
             String pollingApplicationKey = pollMapEntry.getClientRegisterKey();
             if (updateForApplicationKey.equals(pollingApplicationKey)) {
@@ -58,7 +60,7 @@ public class UpdateNotifier {
         pendingPollRequests.remove(key);
     }
 
-    public String generateRegisterKey(String domain, String application) {
+    public String generateRegisterKey(final String domain, final String application) {
         return "%s/%s".formatted(domain.trim().toLowerCase(), application.trim().toLowerCase());
     }
 }

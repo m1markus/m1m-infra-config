@@ -17,24 +17,28 @@ import org.slf4j.LoggerFactory;
 import java.sql.SQLException;
 import java.time.Duration;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Path("/config")
 @ApplicationScoped
 public class ConfigItemResource {
 
-    private static Logger log = LoggerFactory.getLogger(ConfigItemResource.class);
-
-    private static AtomicInteger atomicInteger = new AtomicInteger(0);
+    private static final Logger log = LoggerFactory.getLogger(ConfigItemResource.class);
+    private static final AtomicInteger atomicInteger = new AtomicInteger(0);
 
     @Inject ConfigItemService configItemService;
-    @Inject ChangeNotifier changeNotifier;
+    @Inject
+    UpdateNotifier updateNotifier;
 
     @Path("x")
     @GET
-    public Uni<RestResponse<Object>> getAsync(@RestQuery Integer delayMillis,
-                                @RestQuery String domain,
-                                @RestQuery String application) {
+    public Uni<RestResponse<Object>> getAsyncLongPolling(
+            @RestQuery Integer delayMillis,
+            @RestQuery String domain,
+            @RestQuery String application)
+    {
+        final UUID longPollId = UUID.randomUUID();
         Duration delayRequestForMillis = Duration.ofMillis(30_000);
         if (delayMillis != null) {
             delayRequestForMillis = Duration.ofMillis(delayMillis.longValue());
@@ -47,29 +51,24 @@ public class ConfigItemResource {
         }
         log.info("GET /config/x called... delaySeconds={} domain={} application={}",
                 delayRequestForMillis, domain, application);
-        String registerKey = "%s/%s".formatted(domain.trim(), application.trim());
+        final String registerKey = updateNotifier.generateRegisterKey(domain, application);
 
         return Uni.createFrom().emitter(em -> {
-            log.info("do something with the emitter instance...");
-            changeNotifier.register(em, registerKey);
+            log.info("do something with the emitter instance... em={}", em);
+            updateNotifier.register(longPollId, em, registerKey);
         })
-                .ifNoItem().after(delayRequestForMillis).recoverWithItem("")
+                .ifNoItem().after(delayRequestForMillis).recoverWithItem("noContent")
                 .onItem().transform(item -> {
-                    if ("".equals(item)) {
-                        item = "noContent";
-                    } else {
-                        item = item + "-item-" + atomicInteger.incrementAndGet();
-                    }
+                    item = item + "-item-" + atomicInteger.incrementAndGet();
                     return ResponseBuilder.ok(item, MediaType.TEXT_PLAIN_TYPE)
                             //.status(Response.Status.NO_CONTENT)
                             .status(Response.Status.OK)
                             .build();
                 })
-                .onItem().invoke(item -> log.info("toto END-1"))
-                .log("toto END-2");
-
-        //.onItem().delayIt().by(delayRequestForMillis);
-        //return Uni.createFrom().item("toto");
+                .onItem().invoke(item -> {
+                    updateNotifier.unregister(longPollId);
+                    log.info("toto END-1");
+                });
     }
 
     @GET

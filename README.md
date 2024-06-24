@@ -1,5 +1,17 @@
 # m1m-infra-config
 
+## useful quarkus documentations
+
+https://quarkus.io/guides/
+https://quarkus.io/guides/rest
+https://quarkus.io/guides/hibernate-orm
+
+https://quarkus.io/guides/scheduler
+
+https://smallrye.io/smallrye-mutiny/latest/guides/imperative-to-reactive/#running-blocking-code-on-subscription
+https://quarkus.io/blog/mutiny-invoke-and-call/
+
+
 This project uses Quarkus, the Supersonic Subatomic Java Framework.
 
 If you want to learn more about Quarkus, please visit its website: https://quarkus.io/ .

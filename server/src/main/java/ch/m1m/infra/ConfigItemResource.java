@@ -20,6 +20,8 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
+// see also: @Blocking / @NonBlocking
+
 @Path("/config")
 @ApplicationScoped
 public class ConfigItemResource {
@@ -54,7 +56,7 @@ public class ConfigItemResource {
         final String registerKey = updateNotifier.generateRegisterKey(domain, application);
 
         return Uni.createFrom().emitter(em -> {
-            log.info("do something with the emitter instance... em={}", em);
+            log.info("do something with the emitter instance... em={} pollId={}", em, longPollId);
             updateNotifier.register(longPollId, em, registerKey);
         })
                 .ifNoItem().after(delayRequestForMillis).recoverWithItem("noContent")
@@ -65,9 +67,10 @@ public class ConfigItemResource {
                             .status(Response.Status.OK)
                             .build();
                 })
+                // invoke() is synchronous maybe change to the asynchronous call()
                 .onItem().invoke(item -> {
                     updateNotifier.unregister(longPollId);
-                    log.info("toto END-1");
+                    log.info("long polling call ended for pollId={}", longPollId);
                 });
     }
 

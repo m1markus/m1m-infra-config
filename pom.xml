@@ -30,6 +30,7 @@
     </dependencies>
 
     <modules>
+        <module>x</module>
         <module>server</module>
         <module>client/client-examples</module>
     </modules>

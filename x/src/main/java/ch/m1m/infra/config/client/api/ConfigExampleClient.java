@@ -1,5 +1,7 @@
 package ch.m1m.infra.config.client.api;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -14,8 +16,14 @@ public class ConfigExampleClient {
         String domain = "it-ch";
         String application = "batch";
 
+        Map<String, String> configMap = new HashMap<>();
+        configMap.put(Config.CONFIG_URL, configUrl);
+        configMap.put(Config.CONFIG_DOMAIN, domain);
+        configMap.put(Config.CONFIG_APPLICATION, application);
+
         // this will be an application Singleton
-        Config config = new Config(configUrl, domain, application);
+        //Config config = new Config(configUrl, domain, application);
+        Config config = new Config(configMap);
 
         ConfigExampleClient program = new ConfigExampleClient(config);
         program.run();
@@ -28,7 +36,6 @@ public class ConfigExampleClient {
 
     @ConfigUpdate(key="x.y.z")
     public void updateValues(ConfigUpdateEvent configUpdateEvent) {
-
         key1.set((String)configUpdateEvent.getValue());
     }
 

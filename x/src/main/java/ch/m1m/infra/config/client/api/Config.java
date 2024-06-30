@@ -2,12 +2,20 @@ package ch.m1m.infra.config.client.api;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.time.Instant;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Config {
-    private Thread configPollerThread;
+    public static final String CONFIG_URL = "config.url";
+    public static final String CONFIG_DOMAIN = "config.domain";
+    public static final String CONFIG_APPLICATION = "config.application";
 
-    private Instant start = Instant.now();
+    private Thread configPollerThread;
+    private Map<String, String> extConf = new HashMap<>();
+
+    public Config(Map<String, String> extConf) {
+        this(extConf.get(CONFIG_URL), extConf.get(CONFIG_DOMAIN), extConf.get(CONFIG_APPLICATION));
+    }
 
     public Config(String url, String domain, String application) {
         startConfigPollerThread();
@@ -39,16 +47,6 @@ public class Config {
         }
     }
 
-    public Object getValue(String key) {
-        String key1Value = "key1-value";
-
-        if (start.isBefore(Instant.now().minusSeconds(5))) {
-            key1Value = "key1-NEW-value";
-        }
-
-        return key1Value;
-    }
-
     private void startConfigPollerThread() {
         ConfigPoller configPoller = new ConfigPoller();
         configPollerThread = new Thread(configPoller);
@@ -56,3 +54,5 @@ public class Config {
         configPollerThread.start();
     }
 }
+// Instant start = Instant.now();
+// if (start.isBefore(Instant.now().minusSeconds(5))) {

@@ -1,5 +1,8 @@
 package ch.m1m.infra.config.client.api;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
@@ -9,6 +12,8 @@ public class Config {
     public static final String CONFIG_URL = "config.url";
     public static final String CONFIG_DOMAIN = "config.domain";
     public static final String CONFIG_APPLICATION = "config.application";
+
+    private static final Logger log = LoggerFactory.getLogger(Config.class);
 
     private Thread configPollerThread;
     private Map<String, String> extConf = new HashMap<>();
@@ -30,7 +35,7 @@ public class Config {
                 ConfigUpdate configUpdateAnnotation = method.getAnnotation(ConfigUpdate.class);
                 String key = configUpdateAnnotation.key();
 
-                System.out.println("found method with annotation @ConfigUpdate " + method.getName() + "with key " + key);
+                log.info("found method with annotation @ConfigUpdate {} with key {}", method.getName(), key);
 
                 ConfigUpdateEvent cuEvt = new ConfigUpdateEvent();
                 try {
@@ -42,7 +47,7 @@ public class Config {
                 }
 
             } else {
-                System.out.println("found method " + method.getName());
+                log.info("found method {}", method.getName());
             }
         }
     }

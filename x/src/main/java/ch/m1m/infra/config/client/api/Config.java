@@ -16,7 +16,7 @@ public class Config {
     private static final Logger log = LoggerFactory.getLogger(Config.class);
 
     private Thread configPollerThread;
-    private Map<String, String> extConf = new HashMap<>();
+    private final Map<String, String> extConf = new HashMap<>();
 
     public Config(Map<String, String> extConf) {
         this(extConf.get(CONFIG_URL), extConf.get(CONFIG_DOMAIN), extConf.get(CONFIG_APPLICATION));

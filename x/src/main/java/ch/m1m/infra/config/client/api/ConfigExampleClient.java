@@ -13,7 +13,7 @@ public class ConfigExampleClient {
     private static final Logger log = LoggerFactory.getLogger(ConfigExampleClient.class);
 
     private final Config config;
-    private final AtomicReference<String> key1 = new AtomicReference("not-set");
+    private final AtomicReference<String> key1 = new AtomicReference<>("not-set");
 
     public static void main(String... args) {
 
@@ -41,7 +41,7 @@ public class ConfigExampleClient {
 
     @ConfigUpdate(key="x.y.z")
     public void updateValueKey1(ConfigUpdateEvent configUpdateEvent) {
-        key1.set((String)configUpdateEvent.getValue());
+        key1.set(configUpdateEvent.getValue());
     }
 
     public void run() {

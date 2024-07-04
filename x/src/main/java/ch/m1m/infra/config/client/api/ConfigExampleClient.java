@@ -17,14 +17,15 @@ public class ConfigExampleClient {
 
     public static void main(String... args) {
 
-        String configUrl = "http://config_server.m1m.ch/config";
-        String domain = "it-ch";
+        String configUrl = "http://localhost:8080/config";
+        String domain = "example.com";
         String application = "batch";
 
         Map<String, String> configMap = new HashMap<>();
         configMap.put(Config.CONFIG_URL, configUrl);
         configMap.put(Config.CONFIG_DOMAIN, domain);
         configMap.put(Config.CONFIG_APPLICATION, application);
+        configMap.put(Config.CONFIG_POLL_DURATION_SECONDS, "5");
 
         // this will be an application Singleton
         // Config config = new Config(configUrl, domain, application);

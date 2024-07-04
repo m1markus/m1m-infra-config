@@ -24,32 +24,34 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 @Path("/config")
 @ApplicationScoped
-public class ConfigItemResource {
+public class ConfigResource {
 
-    private static final Logger log = LoggerFactory.getLogger(ConfigItemResource.class);
+    private static final Logger log = LoggerFactory.getLogger(ConfigResource.class);
     private static final AtomicInteger atomicInteger = new AtomicInteger(0);
 
     @Inject ConfigItemService configItemService;
     @Inject
     UpdateNotifier updateNotifier;
 
-    @Path("x")
+    // http://localhost:8080/config/longPollForChange?delaySeconds=3&domain=example.com&application=batch
+    //
+    @Path("longPollForChange")
     @GET
     public Uni<RestResponse<Object>> getAsyncLongPolling(
-            @RestQuery Integer delayMillis,
+            @RestQuery Integer delaySeconds,
             @RestQuery String domain,
             @RestQuery String application)
     {
         final UUID longPollId = UUID.randomUUID();
         Duration delayRequestForMillis = Duration.ofMillis(30_000);
-        if (delayMillis != null) {
-            delayRequestForMillis = Duration.ofMillis(delayMillis.longValue());
+        if (delaySeconds != null) {
+            delayRequestForMillis = Duration.ofMillis(delaySeconds.longValue() * 1000);
         }
         if (domain == null) {
-            domain = "it-ch";
+            domain = "example.com";
         }
         if (application == null) {
-            application = "batch";
+            application = "exampleApp";
         }
         log.info("GET /config/x called... delaySeconds={} domain={} application={}",
                 delayRequestForMillis, domain, application);
@@ -91,6 +93,6 @@ public class ConfigItemResource {
 /* test with
 
 curl --header "Content-Type: application/json" --request POST \
-    --data '{ "id": "ebf0ea1d-6fd4-4675-b890-7cc235a88851", "domain": "it-ch", "application": "batch", "key": "batch.user.password", "value": "1234", "type": "password", "description": "this is my batch user pw" }' http://localhost:8080/config
+    --data '{ "id": "ebf0ea1d-6fd4-4675-b890-7cc235a88851", "domain": "example.com", "application": "batch", "key": "batch.user.password", "value": "1234", "type": "password", "description": "this is my batch user pw" }' http://localhost:8080/config
 
 */

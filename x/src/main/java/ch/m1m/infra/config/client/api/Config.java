@@ -5,24 +5,21 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.HashMap;
 import java.util.Map;
 
 public class Config {
     public static final String CONFIG_URL = "config.url";
     public static final String CONFIG_DOMAIN = "config.domain";
     public static final String CONFIG_APPLICATION = "config.application";
+    public static final String CONFIG_POLL_DURATION_SECONDS = "config.poll.duration.seconds";
 
     private static final Logger log = LoggerFactory.getLogger(Config.class);
 
     private Thread configPollerThread;
-    private final Map<String, String> extConf = new HashMap<>();
+    private final Map<String, String> extConf;
 
     public Config(Map<String, String> extConf) {
-        this(extConf.get(CONFIG_URL), extConf.get(CONFIG_DOMAIN), extConf.get(CONFIG_APPLICATION));
-    }
-
-    public Config(String url, String domain, String application) {
+        this.extConf = extConf;
         startConfigPollerThread();
     }
 
@@ -53,11 +50,12 @@ public class Config {
     }
 
     private void startConfigPollerThread() {
-        ConfigPoller configPoller = new ConfigPoller();
+        ConfigPoller configPoller = new ConfigPoller(extConf);
         configPollerThread = new Thread(configPoller);
         configPollerThread.setDaemon(true);
         configPollerThread.start();
     }
 }
+
 // Instant start = Instant.now();
 // if (start.isBefore(Instant.now().minusSeconds(5))) {

@@ -24,7 +24,7 @@ public class UpdateNotifier {
     @Scheduled(every = "1s")
     public void simulateNotifyWaitingClients() {
         log.info("ChangeNotifier simulateNotifyWaitingClients()");
-        String domain = "it-ch";
+        String domain = "example.com";
         String application = "batch";
         notifyWaitingClients(domain, application);
     }

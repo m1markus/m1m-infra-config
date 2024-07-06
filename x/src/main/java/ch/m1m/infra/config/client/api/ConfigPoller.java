@@ -16,6 +16,11 @@ public class ConfigPoller implements Runnable {
 
     private static final Logger log = LoggerFactory.getLogger(ConfigPoller.class);
 
+    private enum PollMode {
+        INITIAL_LOAD,
+        LONG_POLL
+    }
+
     // one client instance can be reused
     private final HttpClient client = HttpClient.newBuilder()
             .version(HttpClient.Version.HTTP_1_1)
@@ -30,19 +35,28 @@ public class ConfigPoller implements Runnable {
     @Override
     public void run() {
         int sleepForSeconds = 9;
+        PollMode mode = PollMode.INITIAL_LOAD;
+        boolean hasUpdatedConfigItems = true;
 
         String pollUrl = createPollUrl();
+        String getConfigUrl = createGetConfigUrl();
         log.info("using poll url={}", pollUrl);
 
         while (true) {
             log.info("ConfigPoller is running");
 
-            //queryForHello();
-
             try {
-                if (hasUpdatedConfigItems(pollUrl)) {
-                    log.info("need config update, query for new values");
+                if (mode == PollMode.LONG_POLL) {
+                    hasUpdatedConfigItems = hasUpdatedConfigItems(pollUrl);
                 }
+
+                if (hasUpdatedConfigItems) {
+                    String respJsonArrAsString = getAllConfigItems(getConfigUrl);
+                    // convert
+
+                    mode = PollMode.LONG_POLL;
+                }
+
                 sleepForSeconds = 0;
 
             } catch (Exception e) {
@@ -68,12 +82,22 @@ public class ConfigPoller implements Runnable {
                 extConf.get(Config.CONFIG_APPLICATION));
     }
 
+    private String createGetConfigUrl() {
+        String hostPort = extConf.get(Config.CONFIG_URL);
+        return String.format("%s?domain=%s&application=%s",
+                hostPort,
+                extConf.get(Config.CONFIG_DOMAIN),
+                extConf.get(Config.CONFIG_APPLICATION));
+    }
+
     // http://localhost:8080/config/longPollForChange?delaySeconds=5&domain=example.com&application=batch
     //
     private boolean hasUpdatedConfigItems(String pollUrl) throws IOException, InterruptedException {
         boolean hasPendingUpdates = false;
         int restTimeoutSeconds = Integer.valueOf(extConf.get(Config.CONFIG_POLL_DURATION_SECONDS));
         restTimeoutSeconds += 2;
+
+        log.info("initiating GET longPollForChange with {}", pollUrl);
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(pollUrl))
@@ -89,6 +113,22 @@ public class ConfigPoller implements Runnable {
         }
 
         return hasPendingUpdates;
+    }
+
+    private String getAllConfigItems(String getConfigUrl) throws IOException, InterruptedException {
+
+        log.info("initiating GET AllConfigItems with {}", getConfigUrl);
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(getConfigUrl))
+                .GET()
+                .timeout(Duration.ofSeconds(5))
+                .build();
+
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        String respBody = response.body();
+        log.info("response from GET longPollForChange is: {}", respBody);
+        return respBody;
     }
 
     private void queryForHello() {

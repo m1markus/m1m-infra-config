@@ -2,10 +2,10 @@ package ch.m1m.infra.config.client.api;
 
 import ch.m1m.config.model.ConfigItemModel;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
-import java.util.Arrays;
 import java.util.List;
 
 public class ConfigItemModelConverter {
@@ -29,8 +29,7 @@ public class ConfigItemModelConverter {
     }
 
     public List<ConfigItemModel> toList(String input) throws JsonProcessingException {
-        ConfigItemModel[] array = toArray(input);
-        return Arrays.asList(array);
+        return objectMapper.readValue(input, new TypeReference<List<ConfigItemModel>>() {});
     }
 
     public String toJson(ConfigItemModel[] objArray) throws JsonProcessingException {

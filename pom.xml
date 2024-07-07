@@ -60,8 +60,8 @@
     </dependencyManagement>
 
     <modules>
-        <module>x</module>
-        <module>server</module>
         <module>model</module>
+        <module>client</module>
+        <module>server</module>
     </modules>
 </project>

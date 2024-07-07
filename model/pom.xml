@@ -6,21 +6,23 @@
         <groupId>ch.m1m.infra</groupId>
         <artifactId>m1m-infra-config-reactor</artifactId>
         <version>1.0.0-SNAPSHOT</version>
-        <relativePath>../../pom.xml</relativePath>
+        <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>m1m-infra-config-client-examples</artifactId>
+    <artifactId>m1m-infra-config-model</artifactId>
     <version>1.0.0-SNAPSHOT</version>
 
     <dependencies>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
     <build>
         <plugins>
-
         </plugins>
     </build>
-
-
 
 </project>

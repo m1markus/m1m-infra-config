@@ -1,20 +1,17 @@
 package ch.m1m.config.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.ToString;
+import lombok.*;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 @Data
 @Builder
 @ToString
+@NoArgsConstructor
 @AllArgsConstructor
 public class ConfigItemModel {
 
-    private UUID id;
+    private String id;
     private LocalDateTime created_at;
     private LocalDateTime updated_at;
     private String domain;

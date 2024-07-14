@@ -1,5 +1,8 @@
-package ch.m1m.infra.config.client.api;
+package ch.m1m.infra.config.example;
 
+import ch.m1m.infra.config.client.api.Config;
+import ch.m1m.infra.config.client.api.ConfigUpdate;
+import ch.m1m.infra.config.client.api.ConfigUpdateEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,7 +15,6 @@ public class ConfigExampleClient {
 
     private static final Logger log = LoggerFactory.getLogger(ConfigExampleClient.class);
 
-    private final Config config;
     private final AtomicReference<String> key1 = new AtomicReference<>("not-set");
 
     public static void main(String... args) {
@@ -36,7 +38,6 @@ public class ConfigExampleClient {
     }
 
     public ConfigExampleClient(Config config) {
-        this.config = config;
         config.register(this);
     }
 

@@ -63,5 +63,6 @@
         <module>model</module>
         <module>client</module>
         <module>server</module>
+        <module>example-java-cli</module>
     </modules>
 </project>

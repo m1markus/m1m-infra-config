@@ -77,9 +77,10 @@ public class ConfigResource {
     }
 
     @GET
-    public List<ConfigItem> get() throws SQLException {
-        log.warn("GET /config called...");
-        return configItemService.listAllV2();
+    public List<ConfigItem> get(@RestQuery String domain,
+                                @RestQuery String application) throws SQLException {
+        log.warn("GET /config called... domain={} application={}", domain, application);
+        return configItemService.listByDomainAndApplication(domain, application);
     }
 
     @POST

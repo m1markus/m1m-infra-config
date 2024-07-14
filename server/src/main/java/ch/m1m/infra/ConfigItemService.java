@@ -4,6 +4,7 @@ import io.agroal.api.AgroalDataSource;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.TypedQuery;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,10 +45,11 @@ public class ConfigItemService {
         return resultList;
     }
 
-    public List<ConfigItem> listAllV2() throws SQLException {
-        List<ConfigItem> resultList = em.createQuery("SELECT a FROM ConfigItem a ORDER BY key", ConfigItem.class)
-                .getResultList();
-        return resultList;
+    public List<ConfigItem> listByDomainAndApplication(String domain, String application) throws SQLException {
+        TypedQuery<ConfigItem> query = em.createQuery("SELECT a FROM ConfigItem a WHERE a.domain = :domain AND a.application = :application ORDER BY key", ConfigItem.class);
+        query.setParameter("domain", domain);
+        query.setParameter("application", application);
+        return query.getResultList();
     }
 
     @Transactional

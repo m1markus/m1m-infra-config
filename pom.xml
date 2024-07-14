@@ -22,14 +22,18 @@
             <dependency>
                 <groupId>ch.m1m.infra</groupId>
                 <artifactId>m1m-infra-config-model</artifactId>
-                <version>1.0.0-SNAPSHOT</version>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>ch.m1m.infra</groupId>
+                <artifactId>m1m-infra-config-client</artifactId>
+                <version>${project.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>org.projectlombok</groupId>
                 <artifactId>lombok</artifactId>
                 <version>1.18.32</version>
-                <scope>provided</scope>
             </dependency>
             <dependency>
                 <groupId>com.fasterxml.uuid</groupId>

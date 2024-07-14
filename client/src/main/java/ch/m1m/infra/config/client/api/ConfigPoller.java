@@ -5,6 +5,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -12,6 +14,7 @@ import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 
 public class ConfigPoller implements Runnable {
@@ -19,6 +22,7 @@ public class ConfigPoller implements Runnable {
     private static final Logger log = LoggerFactory.getLogger(ConfigPoller.class);
 
     private final ConfigItemModelConverter configItemModelConverter = new ConfigItemModelConverter();
+    private final Config config;
 
     private enum PollMode {
         INITIAL_LOAD,
@@ -32,8 +36,9 @@ public class ConfigPoller implements Runnable {
 
     private Map<String, String> extConf;
 
-    public ConfigPoller(Map<String, String> extConf) {
-        this.extConf = extConf;
+    public ConfigPoller(Config config) {
+        this.config = config;
+        this.extConf = config.getExtConfMap();
     }
 
     @Override
@@ -77,11 +82,44 @@ public class ConfigPoller implements Runnable {
     }
 
     private void processResponseList(List<ConfigItemModel> list) {
-        list.forEach(this::updateConfigForItem);
+        log.info("processResponseList() list={}", list);
+        try {
+            list.forEach(this::updateConfigForItem);
+        } catch (Exception e) {
+            log.error("updateConfigForItem() failed with:", e);
+        }
     }
 
     private void updateConfigForItem(ConfigItemModel item) {
-        log.info("preUpdate for domain={} key={}", item.getDomain(), item.getKey());
+        String key = item.getKey();
+        String value = item.getValue();
+        ConcurrentMap<String, ConfigMethodRepositoryEntry> methodRepoMap = config.getMethodRepoMap();
+        log.info("updateConfigForItem() for domain={} key={} value={}", item.getDomain(), key, value);
+
+        ConfigMethodRepositoryEntry methodRepositoryEntry = methodRepoMap.get(key);
+        if (methodRepositoryEntry != null) {
+            Object instance = methodRepositoryEntry.getInstance();
+            Method method = methodRepositoryEntry.getMethod();
+
+            try {
+                if (method != null && instance != null) {
+                    ConfigUpdateEvent cuEvt = new ConfigUpdateEvent(value);
+                    log.info("pre method.invoke() ...");
+                    method.invoke(instance, cuEvt);
+                    log.info("post method.invoke()");
+
+                } else {
+                    log.info("no update instance or method registered for key={} instance={} method={}",
+                            key, instance, method);
+                }
+            } catch (IllegalAccessException e) {
+                throw new RuntimeException(e);
+            } catch (InvocationTargetException e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            log.warn("no entry in config repository found for key={}", key);
+        }
     }
 
     private String createPollUrl() {

@@ -40,7 +40,7 @@ public class ConfigExampleClient {
         config.register(this);
     }
 
-    @ConfigUpdate(key="x.y.z")
+    @ConfigUpdate(key="batch.user.password")
     public void updateValueKey1(ConfigUpdateEvent configUpdateEvent) {
         key1.set(configUpdateEvent.getValue());
     }

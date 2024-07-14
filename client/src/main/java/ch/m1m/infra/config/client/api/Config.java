@@ -6,6 +6,8 @@ import org.slf4j.LoggerFactory;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 public class Config {
     public static final String CONFIG_URL = "config.url";
@@ -17,6 +19,8 @@ public class Config {
 
     private Thread configPollerThread;
     private final Map<String, String> extConf;
+
+    private final ConcurrentMap<String, ConfigMethodRepositoryEntry> methodRepoMap = new ConcurrentHashMap<>();
 
     public Config(Map<String, String> extConf) {
         this.extConf = extConf;
@@ -32,25 +36,36 @@ public class Config {
                 ConfigUpdate configUpdateAnnotation = method.getAnnotation(ConfigUpdate.class);
                 String key = configUpdateAnnotation.key();
 
-                log.info("found method with annotation @ConfigUpdate {} with key {}", method.getName(), key);
+                log.info("found method with annotation @ConfigUpdate {} for key {}", method.getName(), key);
 
-                ConfigUpdateEvent cuEvt = new ConfigUpdateEvent();
-                try {
-                    method.invoke(instance, cuEvt);
-                } catch (IllegalAccessException e) {
-                    throw new RuntimeException(e);
-                } catch (InvocationTargetException e) {
-                    throw new RuntimeException(e);
-                }
+                // methodRepoMap
+                // map: key = a.b.c
+                // object: object, method
+                // ConfigMethodRepositoryEntry
+                //
+                ConfigMethodRepositoryEntry repoEntry = ConfigMethodRepositoryEntry.builder()
+                        .instance(instance)
+                        .method(method)
+                        .build();
+
+                methodRepoMap.put(key, repoEntry);
 
             } else {
-                log.info("found method {}", method.getName());
+                log.debug("found method {}", method.getName());
             }
         }
     }
 
+    Map<String, String> getExtConfMap() {
+        return this.extConf;
+    }
+
+    ConcurrentMap<String, ConfigMethodRepositoryEntry> getMethodRepoMap() {
+        return this.methodRepoMap;
+    }
+
     private void startConfigPollerThread() {
-        ConfigPoller configPoller = new ConfigPoller(extConf);
+        ConfigPoller configPoller = new ConfigPoller(this);
         configPollerThread = new Thread(configPoller);
         configPollerThread.setDaemon(true);
         configPollerThread.start();

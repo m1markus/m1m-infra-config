@@ -1,5 +1,6 @@
 package ch.m1m.infra.config.client.api;
 
+import ch.m1m.config.model.ConfigItemModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -9,12 +10,15 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 public class ConfigPoller implements Runnable {
 
     private static final Logger log = LoggerFactory.getLogger(ConfigPoller.class);
+
+    private final ConfigItemModelConverter configItemModelConverter = new ConfigItemModelConverter();
 
     private enum PollMode {
         INITIAL_LOAD,
@@ -52,8 +56,7 @@ public class ConfigPoller implements Runnable {
 
                 if (hasUpdatedConfigItems) {
                     String respJsonArrAsString = getAllConfigItems(getConfigUrl);
-                    // convert
-
+                    processResponseList(configItemModelConverter.toList(respJsonArrAsString));
                     mode = PollMode.LONG_POLL;
                 }
 
@@ -71,6 +74,14 @@ public class ConfigPoller implements Runnable {
                 Thread.currentThread().interrupt();
             }
         }
+    }
+
+    private void processResponseList(List<ConfigItemModel> list) {
+        list.forEach(this::updateConfigForItem);
+    }
+
+    private void updateConfigForItem(ConfigItemModel item) {
+        log.info("preUpdate for domain={} key={}", item.getDomain(), item.getKey());
     }
 
     private String createPollUrl() {

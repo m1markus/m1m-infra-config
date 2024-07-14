@@ -53,7 +53,7 @@ public class ConfigResource {
         if (application == null) {
             application = "exampleApp";
         }
-        log.info("GET /config/x called... delaySeconds={} domain={} application={}",
+        log.info("GET /config/longPollForChange called... delaySeconds={} domain={} application={}",
                 delayRequestForMillis, domain, application);
         final String registerKey = updateNotifier.generateRegisterKey(domain, application);
 

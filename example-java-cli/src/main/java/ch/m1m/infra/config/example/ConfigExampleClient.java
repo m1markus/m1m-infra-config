@@ -27,7 +27,7 @@ public class ConfigExampleClient {
         configMap.put(Config.CONFIG_URL, configUrl);
         configMap.put(Config.CONFIG_DOMAIN, domain);
         configMap.put(Config.CONFIG_APPLICATION, application);
-        configMap.put(Config.CONFIG_POLL_DURATION_SECONDS, "5");
+        configMap.put(Config.CONFIG_POLL_DURATION_SECONDS, "10");
 
         // this will be an application Singleton
         // Config config = new Config(configUrl, domain, application);

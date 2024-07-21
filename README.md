@@ -11,6 +11,10 @@ https://quarkus.io/guides/scheduler
 https://smallrye.io/smallrye-mutiny/latest/guides/imperative-to-reactive/#running-blocking-code-on-subscription
 https://quarkus.io/blog/mutiny-invoke-and-call/
 
+## ToDo
+
+fix the lost wake up problem in the client from a long poll missing an update
+
 
 This project uses Quarkus, the Supersonic Subatomic Java Framework.
 

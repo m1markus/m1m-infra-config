@@ -5,6 +5,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
+import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -30,8 +31,7 @@ public class ConfigResource {
     private static final AtomicInteger atomicInteger = new AtomicInteger(0);
 
     @Inject ConfigItemService configItemService;
-    @Inject
-    UpdateNotifier updateNotifier;
+    @Inject UpdateNotifier updateNotifier;
 
     // http://localhost:8080/config/longPollForChange?delaySeconds=3&domain=example.com&application=batch
     //
@@ -89,11 +89,26 @@ public class ConfigResource {
         configItemService.insertConfigItem(configItem);
         return Response.ok().entity(configItem).build();
     }
+
+    @PUT
+    public Response update(ConfigItem configItem) {
+        log.info("PUT /config update() called...");
+        configItemService.updateConfigItem(configItem);
+        updateNotifier.notifyWaitingClients(configItem.getDomain(), configItem.getApplication());
+        return Response.ok().status(204).build();
+    }
 }
 
 /* test with
 
+# insert
+
 curl --header "Content-Type: application/json" --request POST \
     --data '{ "id": "ebf0ea1d-6fd4-4675-b890-7cc235a88851", "domain": "example.com", "application": "batch", "key": "batch.user.password", "value": "1234", "type": "password", "description": "this is my batch user pw" }' http://localhost:8080/config
+
+# update
+
+curl --header "Content-Type: application/json" --request PUT \
+    --data '{ "id": "01907f2b-5a87-7376-a2ae-2f7c602424d0", "domain":"example.com","application":"batch", "value": "8899" }' http://localhost:8080/config
 
 */

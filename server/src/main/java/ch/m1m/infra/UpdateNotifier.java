@@ -21,13 +21,14 @@ public class UpdateNotifier {
         log.info("ChangeNotifier onInit() ");
     }
 
-    @Scheduled(every = "1s")
+    //@Scheduled(every = "1s")
+    /*
     public void simulateNotifyWaitingClients() {
         log.info("ChangeNotifier simulateNotifyWaitingClients()");
         String domain = "example.com";
         String application = "batch";
         notifyWaitingClients(domain, application);
-    }
+    } */
 
     public void notifyWaitingClients(final String domain, final String application) {
         String updateForApplicationKey = generateRegisterKey(domain, application);

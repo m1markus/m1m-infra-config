@@ -13,6 +13,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -68,6 +69,20 @@ public class ConfigItemService {
                 .setParameter(5, configItem.getValue())
                 .setParameter(6, configItem.getType())
                 .setParameter(7, configItem.getDescription())
+                .executeUpdate();
+    }
+
+    @Transactional
+    public void updateConfigItem(ConfigItem configItem) {
+
+        log.info("try to update: {}", configItem);
+
+        em.createNativeQuery("UPDATE Config_Item SET updated_at=?, value=? WHERE id=?")
+                // more operational
+                .setParameter(1, LocalDateTime.now())
+                // application fields
+                .setParameter(2, configItem.getValue())
+                .setParameter(3, configItem.getId())
                 .executeUpdate();
     }
 }

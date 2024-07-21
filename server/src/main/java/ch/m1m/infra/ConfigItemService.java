@@ -88,4 +88,12 @@ public class ConfigItemService {
                 .setParameter(3, configItem.getId())
                 .executeUpdate();
     }
+
+    @Transactional
+    public void deleteConfigItem(ConfigItem configItem) {
+        log.info("try to delete: {}", configItem);
+        em.createNativeQuery("DELETE FROM Config_Item WHERE id=:id")
+                .setParameter("id", configItem.getId())
+                .executeUpdate();
+    }
 }

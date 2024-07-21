@@ -4,10 +4,7 @@ import io.smallrye.mutiny.Uni;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.PUT;
-import jakarta.ws.rs.Path;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
@@ -113,6 +110,15 @@ public class ConfigResource {
         updateNotifier.notifyWaitingClients(configItem.getDomain(), configItem.getApplication());
         return Response.ok().status(204).build();
     }
+
+    @DELETE
+    public Response delete(ConfigItem configItem) {
+        log.info("DELETE /config delete() called...");
+        configItemUtil.applyDefaults(configItem);
+        configItemService.deleteConfigItem(configItem);
+        updateNotifier.notifyWaitingClients(configItem.getDomain(), configItem.getApplication());
+        return Response.ok().status(204).build();
+    }
 }
 
 /* test with
@@ -133,7 +139,6 @@ CREATE TABLE public.CONFIG_ITEM (
 );
 
 
-
 # insert
 
 curl --header "Content-Type: application/json" --request POST \
@@ -142,6 +147,11 @@ curl --header "Content-Type: application/json" --request POST \
 # update
 
 curl --header "Content-Type: application/json" --request PUT \
+    --data '{ "id": "0190d66e-17ed-724d-a5f5-17016f7d0a21", "domain":"example.com","application":"batch", "value": "8899" }' http://localhost:8080/config
+
+# delete
+
+curl --header "Content-Type: application/json" --request DELETE \
     --data '{ "id": "0190d66e-17ed-724d-a5f5-17016f7d0a21", "domain":"example.com","application":"batch", "value": "8899" }' http://localhost:8080/config
 
 */

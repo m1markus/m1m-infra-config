@@ -58,17 +58,20 @@ public class ConfigItemService {
 
         log.info("try to insert: {}", configItem);
 
-        UUID newId = uuidGenerator.generate();
-        configItem.setId(newId);
+        if (configItem.getId() == null) {
+            UUID newId = uuidGenerator.generate();
+            configItem.setId(newId);
+        }
 
-        em.createNativeQuery("INSERT INTO Config_Item (id, domain, application, key, value, type, description) VALUES (?,?,?,?,?,?,?)")
+        em.createNativeQuery("INSERT INTO Config_Item (id, domain, ou, application, key, value, type, description) VALUES (?,?,?,?,?,?,?,?)")
                 .setParameter(1, configItem.getId())
                 .setParameter(2, configItem.getDomain())
-                .setParameter(3, configItem.getApplication())
-                .setParameter(4, configItem.getKey())
-                .setParameter(5, configItem.getValue())
-                .setParameter(6, configItem.getType())
-                .setParameter(7, configItem.getDescription())
+                .setParameter(3, configItem.getOu())
+                .setParameter(4, configItem.getApplication())
+                .setParameter(5, configItem.getKey())
+                .setParameter(6, configItem.getValue())
+                .setParameter(7, configItem.getType())
+                .setParameter(8, configItem.getDescription())
                 .executeUpdate();
     }
 

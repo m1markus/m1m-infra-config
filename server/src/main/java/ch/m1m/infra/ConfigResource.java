@@ -1,6 +1,7 @@
 package ch.m1m.infra;
 
 import io.smallrye.mutiny.Uni;
+import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
@@ -9,6 +10,7 @@ import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.resteasy.reactive.RestQuery;
 import org.jboss.resteasy.reactive.RestResponse;
 import org.jboss.resteasy.reactive.RestResponse.ResponseBuilder;
@@ -30,8 +32,20 @@ public class ConfigResource {
     private static final Logger log = LoggerFactory.getLogger(ConfigResource.class);
     private static final AtomicInteger atomicInteger = new AtomicInteger(0);
 
+    private ConfigItemUtil configItemUtil;
+
+    @ConfigProperty(name = "appl.config.default.domain")
+    private String domain;
+    @ConfigProperty(name = "appl.config.default.ou")
+    private String orgUnit;
+
     @Inject ConfigItemService configItemService;
     @Inject UpdateNotifier updateNotifier;
+
+    @PostConstruct
+    public void init() {
+        configItemUtil = new ConfigItemUtil(domain, orgUnit);
+    }
 
     // http://localhost:8080/config/longPollForChange?delaySeconds=3&domain=example.com&application=batch
     //
@@ -86,6 +100,7 @@ public class ConfigResource {
     @POST
     public Response insert(ConfigItem configItem) {
         log.info("POST /config insert() called...");
+        configItemUtil.applyDefaults(configItem);
         configItemService.insertConfigItem(configItem);
         return Response.ok().entity(configItem).build();
     }
@@ -93,6 +108,7 @@ public class ConfigResource {
     @PUT
     public Response update(ConfigItem configItem) {
         log.info("PUT /config update() called...");
+        configItemUtil.applyDefaults(configItem);
         configItemService.updateConfigItem(configItem);
         updateNotifier.notifyWaitingClients(configItem.getDomain(), configItem.getApplication());
         return Response.ok().status(204).build();
@@ -101,14 +117,31 @@ public class ConfigResource {
 
 /* test with
 
+CREATE TABLE public.CONFIG_ITEM (
+	id uuid NOT NULL,
+	created_at timestamp(6) DEFAULT now() NOT NULL,
+	updated_at timestamp(6) DEFAULT now() NOT NULL,
+	domain varchar(255) NOT NULL,
+	ou varchar(255) NOT NULL,
+	application varchar(255) NOT NULL,
+	key varchar(255) NOT NULL,
+	value varchar(4096) NULL,
+	type varchar(128) NULL,
+	description varchar(4096) NULL,
+
+	CONSTRAINT configitem_pkey PRIMARY KEY (id)
+);
+
+
+
 # insert
 
 curl --header "Content-Type: application/json" --request POST \
-    --data '{ "id": "ebf0ea1d-6fd4-4675-b890-7cc235a88851", "domain": "example.com", "application": "batch", "key": "batch.user.password", "value": "1234", "type": "password", "description": "this is my batch user pw" }' http://localhost:8080/config
+    --data '{ "id": "0190d66e-17ed-724d-a5f5-17016f7d0a21", "domain": "example.com", "application": "batch", "key": "batch.user.password", "value": "1234", "type": "password", "description": "this is my batch user pw" }' http://localhost:8080/config
 
 # update
 
 curl --header "Content-Type: application/json" --request PUT \
-    --data '{ "id": "01907f2b-5a87-7376-a2ae-2f7c602424d0", "domain":"example.com","application":"batch", "value": "8899" }' http://localhost:8080/config
+    --data '{ "id": "0190d66e-17ed-724d-a5f5-17016f7d0a21", "domain":"example.com","application":"batch", "value": "8899" }' http://localhost:8080/config
 
 */

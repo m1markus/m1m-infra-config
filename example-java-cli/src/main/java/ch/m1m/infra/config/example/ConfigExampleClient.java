@@ -15,7 +15,7 @@ public class ConfigExampleClient {
 
     private static final Logger log = LoggerFactory.getLogger(ConfigExampleClient.class);
 
-    private final AtomicReference<String> key1 = new AtomicReference<>("not-set");
+    private final AtomicReference<String> key1 = new AtomicReference<String>("not-set-at-all-v2");
 
     public static void main(String... args) {
 
@@ -23,7 +23,7 @@ public class ConfigExampleClient {
         String domain = "example.com";
         String application = "batch";
 
-        Map<String, String> configMap = new HashMap<>();
+        Map<String, String> configMap = new HashMap<String, String>();
         configMap.put(Config.CONFIG_URL, configUrl);
         configMap.put(Config.CONFIG_DOMAIN, domain);
         configMap.put(Config.CONFIG_APPLICATION, application);

@@ -21,11 +21,13 @@ public class ConfigExampleClient {
 
         String configUrl = "http://localhost:8080/config";
         String domain = "example.com";
+        String ou = "exampleOrgUnit";
         String application = "batch";
 
         Map<String, String> configMap = new HashMap<String, String>();
         configMap.put(Config.CONFIG_URL, configUrl);
         configMap.put(Config.CONFIG_DOMAIN, domain);
+        configMap.put(Config.CONFIG_OU, ou);
         configMap.put(Config.CONFIG_APPLICATION, application);
         configMap.put(Config.CONFIG_POLL_DURATION_SECONDS, "10");
 

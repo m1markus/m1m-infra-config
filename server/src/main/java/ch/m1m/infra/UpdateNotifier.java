@@ -1,6 +1,5 @@
 package ch.m1m.infra;
 
-import io.quarkus.scheduler.Scheduled;
 import io.smallrye.mutiny.subscription.UniEmitter;
 import jakarta.annotation.PostConstruct;
 import jakarta.inject.Singleton;
@@ -30,9 +29,9 @@ public class UpdateNotifier {
         notifyWaitingClients(domain, application);
     } */
 
-    public void notifyWaitingClients(final String domain, final String application) {
-        String updateForApplicationKey = generateRegisterKey(domain, application);
-        log.info("ChangeNotifier notifyWaitingClients() for application={}", updateForApplicationKey);
+    public void notifyWaitingClients(final String domain, final String ou, final String application) {
+        String updateForApplicationKey = generateRegisterKey(domain, ou, application);
+        log.info("ChangeNotifier notifyWaitingClients() for key={}", updateForApplicationKey);
         log.info("notify pendingPollRequests size={}", pendingPollRequests.size());
 
         pendingPollRequests.forEach((key, pollMapEntry) -> {
@@ -61,7 +60,7 @@ public class UpdateNotifier {
         pendingPollRequests.remove(key);
     }
 
-    public String generateRegisterKey(final String domain, final String application) {
-        return "%s/%s".formatted(domain.trim().toLowerCase(), application.trim().toLowerCase());
+    public String generateRegisterKey(final String domain, final String ou, final String application) {
+        return "%s/%s/%s".formatted(domain.trim().toLowerCase(), ou.trim().toLowerCase(), application.trim().toLowerCase());
     }
 }

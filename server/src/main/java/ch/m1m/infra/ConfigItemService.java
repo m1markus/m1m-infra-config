@@ -46,9 +46,10 @@ public class ConfigItemService {
         return resultList;
     }
 
-    public List<ConfigItem> listByDomainAndApplication(String domain, String application) throws SQLException {
-        TypedQuery<ConfigItem> query = em.createQuery("SELECT a FROM ConfigItem a WHERE a.domain = :domain AND a.application = :application ORDER BY key", ConfigItem.class);
+    public List<ConfigItem> listByDomainAndApplication(String domain, String ou, String application) throws SQLException {
+        TypedQuery<ConfigItem> query = em.createQuery("SELECT a FROM ConfigItem a WHERE a.domain=:domain AND a.ou=:ou AND a.application=:application ORDER BY key", ConfigItem.class);
         query.setParameter("domain", domain);
+        query.setParameter("ou", ou);
         query.setParameter("application", application);
         return query.getResultList();
     }

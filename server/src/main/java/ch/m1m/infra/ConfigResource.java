@@ -51,6 +51,7 @@ public class ConfigResource {
     public Uni<RestResponse<Object>> getAsyncLongPolling(
             @RestQuery Integer delaySeconds,
             @RestQuery String domain,
+            @RestQuery String ou,
             @RestQuery String application)
     {
         final UUID longPollId = UUID.randomUUID();
@@ -59,14 +60,22 @@ public class ConfigResource {
             delayRequestForMillis = Duration.ofMillis(delaySeconds.longValue() * 1000);
         }
         if (domain == null) {
-            domain = "example.com";
+            domain = configItemUtil.getDomain();
+            log.info("domain was null set default value {}", domain);
+        }
+        if (ou == null) {
+            ou = configItemUtil.getOu();
+            log.info("ou was null set default value {}", ou);
         }
         if (application == null) {
             application = "exampleApp";
+            log.info("application was null set value {}", application);
         }
-        log.info("GET /config/longPollForChange called... delaySeconds={} domain={} application={}",
-                delayRequestForMillis, domain, application);
-        final String registerKey = updateNotifier.generateRegisterKey(domain, application);
+
+        log.info("GET /config/longPollForChange called... delaySeconds={} domain={} ou={} application={}",
+                delayRequestForMillis, domain, ou, application);
+        final String registerKey = updateNotifier.generateRegisterKey(domain, ou, application);
+        log.info("register client with notify key={}", registerKey);
 
         return Uni.createFrom().emitter(em -> {
             log.info("do something with the emitter instance... em={} pollId={}", em, longPollId);
@@ -89,9 +98,18 @@ public class ConfigResource {
 
     @GET
     public List<ConfigItem> get(@RestQuery String domain,
+                                @RestQuery String ou,
                                 @RestQuery String application) throws SQLException {
-        log.warn("GET /config called... domain={} application={}", domain, application);
-        return configItemService.listByDomainAndApplication(domain, application);
+        log.info("GET /config called... domain={} ou={} application={}", domain, ou, application);
+        if (domain == null) {
+            domain = configItemUtil.getDomain();
+            log.info("domain was null set default value {}", domain);
+        }
+        if (ou == null) {
+            ou = configItemUtil.getOu();
+            log.info("ou was null set default value {}", ou);
+        }
+        return configItemService.listByDomainAndApplication(domain, ou, application);
     }
 
     @POST
@@ -107,7 +125,7 @@ public class ConfigResource {
         log.info("PUT /config update() called...");
         configItemUtil.applyDefaults(configItem);
         configItemService.updateConfigItem(configItem);
-        updateNotifier.notifyWaitingClients(configItem.getDomain(), configItem.getApplication());
+        updateNotifier.notifyWaitingClients(configItem.getDomain(), configItem.getOu(), configItem.getApplication());
         return Response.ok().status(204).build();
     }
 
@@ -116,7 +134,7 @@ public class ConfigResource {
         log.info("DELETE /config delete() called...");
         configItemUtil.applyDefaults(configItem);
         configItemService.deleteConfigItem(configItem);
-        updateNotifier.notifyWaitingClients(configItem.getDomain(), configItem.getApplication());
+        updateNotifier.notifyWaitingClients(configItem.getDomain(), configItem.getOu(), configItem.getApplication());
         return Response.ok().status(204).build();
     }
 }
@@ -153,5 +171,9 @@ curl --header "Content-Type: application/json" --request PUT \
 
 curl --header "Content-Type: application/json" --request DELETE \
     --data '{ "id": "0190d66e-17ed-724d-a5f5-17016f7d0a21", "domain":"example.com","application":"batch", "value": "8899" }' http://localhost:8080/config
+
+# select
+
+curl "http://localhost:8080/config?domain=example.com&ou=exampleOrgUnit&application=batch"
 
 */

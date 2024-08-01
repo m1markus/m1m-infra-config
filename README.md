@@ -13,7 +13,10 @@ https://quarkus.io/blog/mutiny-invoke-and-call/
 
 ## ToDo
 
-fix the lost wake up problem in the client from a long poll missing an update
+Fix the lost wake up problem in the client from a long poll missing an update.
+Timestamp from last recent processed updated_at record is sent by the client.
+The backend has to check for available db updates for that application and
+fire the event right away if there are some. Next step implement db query... :)
 
 
 This project uses Quarkus, the Supersonic Subatomic Java Framework.

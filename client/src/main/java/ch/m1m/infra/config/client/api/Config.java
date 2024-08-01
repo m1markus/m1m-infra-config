@@ -12,6 +12,7 @@ import java.util.concurrent.ConcurrentMap;
 public class Config {
     public static final String CONFIG_URL = "config.url";
     public static final String CONFIG_DOMAIN = "config.domain";
+    public static final String CONFIG_OU = "config.ou";
     public static final String CONFIG_APPLICATION = "config.application";
     public static final String CONFIG_POLL_DURATION_SECONDS = "config.poll.duration.seconds";
 

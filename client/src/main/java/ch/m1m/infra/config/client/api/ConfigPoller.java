@@ -12,6 +12,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
@@ -21,6 +22,7 @@ public class ConfigPoller implements Runnable {
 
     private static final Logger log = LoggerFactory.getLogger(ConfigPoller.class);
 
+    private LocalDateTime lastProcessedRecordUpdatedAt = LocalDateTime.of(1970, 1, 1, 13, 59, 59);
     private final ConfigItemModelConverter configItemModelConverter = new ConfigItemModelConverter();
     private final Config config;
 
@@ -46,16 +48,14 @@ public class ConfigPoller implements Runnable {
         int sleepForSeconds = 9;
         PollMode mode = PollMode.INITIAL_LOAD;
         boolean hasUpdatedConfigItems = true;
-
-        String pollUrl = createPollUrl();
         String getConfigUrl = createGetConfigUrl();
-        log.info("using poll url={}", pollUrl);
 
         while (true) {
-            log.info("ConfigPoller is running");
+            log.info("ConfigPoller is running, processedLastRecentRecordUpdatedAt={}", lastProcessedRecordUpdatedAt);
 
             try {
                 if (mode == PollMode.LONG_POLL) {
+                    String pollUrl = createPollUrl(lastProcessedRecordUpdatedAt);
                     hasUpdatedConfigItems = hasUpdatedConfigItems(pollUrl);
                 }
 
@@ -108,6 +108,10 @@ public class ConfigPoller implements Runnable {
                     method.invoke(instance, cuEvt);
                     log.info("post method.invoke()");
 
+                    if (lastProcessedRecordUpdatedAt.isBefore(item.getUpdated_at())) {
+                        lastProcessedRecordUpdatedAt = item.getUpdated_at();
+                    }
+
                 } else {
                     log.info("no update instance or method registered for key={} instance={} method={}",
                             key, instance, method);
@@ -122,25 +126,24 @@ public class ConfigPoller implements Runnable {
         }
     }
 
-    private String createPollUrl() {
-        String hostPort = extConf.get(Config.CONFIG_URL);
-        return String.format("%s/longPollForChange?delaySeconds=%s&domain=%s&application=%s",
-                hostPort,
+    private String createPollUrl(LocalDateTime lastProcessedRecordUpdatedAt) {
+        return String.format("%s/longPollForChange?delaySeconds=%s&domain=%s&ou=%s&application=%s&lastProcessedRecordUpdatedAt=%s",
+                extConf.get(Config.CONFIG_URL),
                 extConf.get(Config.CONFIG_POLL_DURATION_SECONDS),
                 extConf.get(Config.CONFIG_DOMAIN),
-                extConf.get(Config.CONFIG_APPLICATION));
+                extConf.get(Config.CONFIG_OU),
+                extConf.get(Config.CONFIG_APPLICATION),
+                lastProcessedRecordUpdatedAt.toString());
     }
 
     private String createGetConfigUrl() {
-        String hostPort = extConf.get(Config.CONFIG_URL);
-        return String.format("%s?domain=%s&application=%s",
-                hostPort,
+        return String.format("%s?domain=%s&ou=%s&application=%s",
+                extConf.get(Config.CONFIG_URL),
                 extConf.get(Config.CONFIG_DOMAIN),
+                extConf.get(Config.CONFIG_OU),
                 extConf.get(Config.CONFIG_APPLICATION));
     }
 
-    // http://localhost:8080/config/longPollForChange?delaySeconds=5&domain=example.com&application=batch
-    //
     private boolean hasUpdatedConfigItems(String pollUrl) throws IOException, InterruptedException {
         boolean hasPendingUpdates = false;
         int restTimeoutSeconds = Integer.valueOf(extConf.get(Config.CONFIG_POLL_DURATION_SECONDS));

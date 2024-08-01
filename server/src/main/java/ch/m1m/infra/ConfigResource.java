@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import java.sql.SQLException;
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -44,7 +45,7 @@ public class ConfigResource {
         configItemUtil = new ConfigItemUtil(domain, orgUnit);
     }
 
-    // http://localhost:8080/config/longPollForChange?delaySeconds=3&domain=example.com&application=batch
+    // http://localhost:8080/config/longPollForChange?delaySeconds=3&domain=example.com&ou=exampleOrgUnit&&application=batch
     //
     @Path("longPollForChange")
     @GET
@@ -52,13 +53,16 @@ public class ConfigResource {
             @RestQuery Integer delaySeconds,
             @RestQuery String domain,
             @RestQuery String ou,
-            @RestQuery String application)
+            @RestQuery String application,
+            @RestQuery LocalDateTime lastProcessedRecordUpdatedAt)
     {
         final UUID longPollId = UUID.randomUUID();
         Duration delayRequestForMillis = Duration.ofMillis(30_000);
         if (delaySeconds != null) {
             delayRequestForMillis = Duration.ofMillis(delaySeconds.longValue() * 1000);
         }
+        log.info("GET /config/longPollForChange called... delaySeconds={} domain={} ou={} application={} lastProcessedRecordUpdatedAt={}",
+                delayRequestForMillis, domain, ou, application, lastProcessedRecordUpdatedAt);
         if (domain == null) {
             domain = configItemUtil.getDomain();
             log.info("domain was null set default value {}", domain);
@@ -72,8 +76,6 @@ public class ConfigResource {
             log.info("application was null set value {}", application);
         }
 
-        log.info("GET /config/longPollForChange called... delaySeconds={} domain={} ou={} application={}",
-                delayRequestForMillis, domain, ou, application);
         final String registerKey = updateNotifier.generateRegisterKey(domain, ou, application);
         log.info("register client with notify key={}", registerKey);
 

@@ -36,7 +36,7 @@ public class ConfigPoller implements Runnable {
             .version(HttpClient.Version.HTTP_1_1)
             .build();
 
-    private Map<String, String> extConf;
+    private final Map<String, String> extConf;
 
     public ConfigPoller(Config config) {
         this.config = config;
@@ -45,7 +45,7 @@ public class ConfigPoller implements Runnable {
 
     @Override
     public void run() {
-        int sleepForSeconds = 9;
+        int sleepForSeconds;
         PollMode mode = PollMode.INITIAL_LOAD;
         boolean hasUpdatedConfigItems = true;
         String getConfigUrl = createGetConfigUrl();
@@ -116,11 +116,10 @@ public class ConfigPoller implements Runnable {
                     log.info("no update instance or method registered for key={} instance={} method={}",
                             key, instance, method);
                 }
-            } catch (IllegalAccessException e) {
-                throw new RuntimeException(e);
-            } catch (InvocationTargetException e) {
+            } catch (IllegalAccessException | InvocationTargetException e) {
                 throw new RuntimeException(e);
             }
+
         } else {
             log.warn("no entry in config repository found for key={}", key);
         }
@@ -146,7 +145,7 @@ public class ConfigPoller implements Runnable {
 
     private boolean hasUpdatedConfigItems(String pollUrl) throws IOException, InterruptedException {
         boolean hasPendingUpdates = false;
-        int restTimeoutSeconds = Integer.valueOf(extConf.get(Config.CONFIG_POLL_DURATION_SECONDS));
+        int restTimeoutSeconds = Integer.parseInt(extConf.get(Config.CONFIG_POLL_DURATION_SECONDS));
         restTimeoutSeconds += 2;
 
         log.info("initiating GET longPollForChange with {}", pollUrl);

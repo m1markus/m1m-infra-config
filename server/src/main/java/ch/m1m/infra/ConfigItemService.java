@@ -18,7 +18,7 @@ import java.util.UUID;
 @ApplicationScoped
 public class ConfigItemService {
 
-    private static Logger log = LoggerFactory.getLogger(ConfigItemService.class);
+    private static final Logger log = LoggerFactory.getLogger(ConfigItemService.class);
 
     @Inject
     AgroalDataSource defaultDataSource;
@@ -72,7 +72,7 @@ public class ConfigItemService {
         return result;
     }
 
-    public List<ConfigItem> listByDomainAndApplication(String domain, String ou, String application) throws SQLException {
+    public List<ConfigItem> listByDomainAndApplication(String domain, String ou, String application) {
         TypedQuery<ConfigItem> query = em.createQuery("SELECT a FROM ConfigItem a WHERE a.domain=:domain AND a.ou=:ou AND a.application=:application ORDER BY key", ConfigItem.class);
         query.setParameter("domain", domain);
         query.setParameter("ou", ou);

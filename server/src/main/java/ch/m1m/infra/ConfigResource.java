@@ -45,7 +45,7 @@ public class ConfigResource {
         configItemUtil = new ConfigItemUtil(domain, orgUnit);
     }
 
-    // http://localhost:8080/config/longPollForChange?delaySeconds=3&domain=example.com&ou=exampleOrgUnit&&application=batch
+    // http://localhost:8080/config/longPollForChange?delaySeconds=3&domain=example.com&ou=exampleOrgUnit&&application=batch&lastProcessedRecordUpdatedAt=1970-01-01T13:01:59.123999
     //
     @Path("longPollForChange")
     @GET
@@ -54,8 +54,7 @@ public class ConfigResource {
             @RestQuery String domain,
             @RestQuery String ou,
             @RestQuery String application,
-            @RestQuery LocalDateTime lastProcessedRecordUpdatedAt)
-    {
+            @RestQuery LocalDateTime lastProcessedRecordUpdatedAt) {
         final UUID longPollId = UUID.randomUUID();
         Duration delayRequestForMillis = Duration.ofMillis(30_000);
         if (delaySeconds != null) {
@@ -79,9 +78,25 @@ public class ConfigResource {
         final String registerKey = updateNotifier.generateRegisterKey(domain, ou, application);
         log.info("register client with notify key={}", registerKey);
 
+        final String finDomain = domain;
+        final String finOu = ou;
+        final String finAppl = application;
+
         return Uni.createFrom().emitter(em -> {
             log.info("do something with the emitter instance... em={} pollId={}", em, longPollId);
             updateNotifier.register(longPollId, em, registerKey);
+            try {
+                // lost update detector
+                //
+                long numPendingUpdates = configItemService.countPendingUpdates(finDomain, finOu, finAppl, lastProcessedRecordUpdatedAt);
+                log.info("numPendingUpdates={}", numPendingUpdates);
+                if (numPendingUpdates > 0) {
+                    em.complete("needUpdate");
+                }
+            } catch(SQLException e) {
+                log.error("failed to evaluate numPendingUpdates", e);
+            }
+
         })
                 .ifNoItem().after(delayRequestForMillis).recoverWithItem("noContent")
                 .onItem().transform(item -> {

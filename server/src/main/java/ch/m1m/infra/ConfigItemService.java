@@ -9,10 +9,7 @@ import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -37,13 +34,42 @@ public class ConfigItemService {
         Connection conn = defaultDataSource.getConnection();
         Statement stmt = conn.createStatement();
 
-        ResultSet rs = stmt.executeQuery("SELECT id, key FROM ConfigItem ORDER BY key");
+        ResultSet rs = stmt.executeQuery("SELECT id, key FROM CONFIG_ITEM ORDER BY key");
         while (rs.next()) {
             String id = rs.getString("id");
             String key = rs.getString("key");
             resultList.add(new ConfigItem(UUID.fromString(id), key));
         }
+        rs.close();
+        stmt.close();
+        conn.close();
         return resultList;
+    }
+
+    public Long countPendingUpdates(String domain, String ou, String application, LocalDateTime lastUpdatedAt) throws SQLException {
+        Long result = 0L;
+        Connection conn = defaultDataSource.getConnection();
+        PreparedStatement stmt = conn.prepareStatement("""
+        SELECT count(*) as count 
+         FROM CONFIG_ITEM c 
+         WHERE c.domain=? 
+         AND c.ou=? 
+         AND c.application=? 
+         AND c.updated_at > ? 
+        """);
+        stmt.setString(1, domain);
+        stmt.setString(2, ou);
+        stmt.setString(3, application);
+        stmt.setObject(4, lastUpdatedAt);
+
+        ResultSet rs = stmt.executeQuery();
+        while (rs.next()) {
+            result = rs.getLong("count");
+        }
+        rs.close();
+        stmt.close();
+        conn.close();
+        return result;
     }
 
     public List<ConfigItem> listByDomainAndApplication(String domain, String ou, String application) throws SQLException {

@@ -191,6 +191,6 @@ curl --header "Content-Type: application/json" --request DELETE \
 
 # select
 
-curl "http://localhost:8080/config?domain=example.com&ou=exampleOrgUnit&application=batch"
+curl -s "http://localhost:8080/config?domain=example.com&ou=exampleOrgUnit&application=batch" | jq
 
 */

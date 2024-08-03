@@ -116,7 +116,7 @@ public class ConfigResource {
     @GET
     public List<ConfigItem> get(@RestQuery String domain,
                                 @RestQuery String ou,
-                                @RestQuery String application) throws SQLException {
+                                @RestQuery String application) {
         log.info("GET /config called... domain={} ou={} application={}", domain, ou, application);
         if (domain == null) {
             domain = configItemUtil.getDomain();

@@ -50,12 +50,12 @@ public class ConfigItemService {
         Long result = 0L;
         Connection conn = defaultDataSource.getConnection();
         PreparedStatement stmt = conn.prepareStatement("""
-        SELECT count(*) as count 
-         FROM CONFIG_ITEM c 
-         WHERE c.domain=? 
-         AND c.ou=? 
-         AND c.application=? 
-         AND c.updated_at > ? 
+        SELECT count(*) as count
+         FROM CONFIG_ITEM c
+         WHERE c.domain=?
+         AND c.ou=?
+         AND c.application=?
+         AND c.updated_at > ?
         """);
         stmt.setString(1, domain);
         stmt.setString(2, ou);

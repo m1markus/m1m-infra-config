@@ -103,13 +103,14 @@ mvn dependency:copy-dependencies
 
 ```
 java -cp .:./target/classes:target/dependency/m1m-infra-config-client-1.0.0-SNAPSHOT.jar:\
+./target/classes:target/dependency/m1m-infra-config-model-1.0.0-SNAPSHOT.jar:\
 ./target/classes:target/dependency/slf4j-api-2.0.13.jar:\
 ./target/classes:target/dependency/slf4j-simple-2.0.13.jar:\
-./target/classes:target/dependency/m1m-infra-config-model-1.0.0-SNAPSHOT.jar:\
 ./target/classes:target/dependency/jackson-annotations-2.17.2.jar:\
 ./target/classes:target/dependency/jackson-core-2.17.2.jar:\
 ./target/classes:target/dependency/jackson-databind-2.17.2.jar:\
-./target/classes:target/dependency/jackson-datatype-jsr310-2.17.2.jar: ch.m1m.infra.config.example.ConfigExampleClient
+./target/classes:target/dependency/jackson-datatype-jsr310-2.17.2.jar\
+ ch.m1m.infra.config.example.ConfigExampleClient
 
 ```
 

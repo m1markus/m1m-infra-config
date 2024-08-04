@@ -91,6 +91,7 @@ public class ConfigResource {
                 long numPendingUpdates = configItemService.countPendingUpdates(finDomain, finOu, finAppl, lastProcessedRecordUpdatedAt);
                 log.info("numPendingUpdates={}", numPendingUpdates);
                 if (numPendingUpdates > 0) {
+                    log.info("calling complete() on the emitter because of penning updates");
                     em.complete("needUpdate");
                 }
             } catch(SQLException e) {

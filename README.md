@@ -92,12 +92,16 @@ curl -s "http://localhost:8080/config?domain=example.com&ou=exampleOrgUnit&appli
 9. Run the example client
 
 The client prints every second the value to the console
+
 ```
-# switch directory
 cd example-java-cli
+```
 
+```
 mvn dependency:copy-dependencies
+```
 
+```
 java -cp .:./target/classes:target/dependency/m1m-infra-config-client-1.0.0-SNAPSHOT.jar:\
 ./target/classes:target/dependency/slf4j-api-2.0.13.jar:\
 ./target/classes:target/dependency/slf4j-simple-2.0.13.jar:\

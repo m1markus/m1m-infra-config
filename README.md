@@ -39,7 +39,10 @@ docker compose up
 
 4. Create the database resources
 
-Use your favorite PostgeSQL admin client to create the db objects. All the connect parameters are available in the 'docker-compose.yml'.
+Use your favorite PostgeSQL admin client to create the db objects. All the connect parameters are available in the 'docker-compose.yml'. The JDBC connection URL is:
+```
+jdbc:postgresql://localhost:5432/rpat-config
+```
 
 I'm using [DBeaver](https://dbeaver.io/).
 
@@ -67,7 +70,7 @@ CREATE TABLE public.CONFIG_ITEM (
 Run the follwoing maven command to build everything
 
 ```
-mvn clean package
+mvn clean install
 ```
 
 6. Start the config server
@@ -102,16 +105,7 @@ mvn dependency:copy-dependencies
 ```
 
 ```
-java -cp .:./target/classes:target/dependency/m1m-infra-config-client-1.0.0-SNAPSHOT.jar:\
-./target/classes:target/dependency/m1m-infra-config-model-1.0.0-SNAPSHOT.jar:\
-./target/classes:target/dependency/slf4j-api-2.0.13.jar:\
-./target/classes:target/dependency/slf4j-simple-2.0.13.jar:\
-./target/classes:target/dependency/jackson-annotations-2.17.2.jar:\
-./target/classes:target/dependency/jackson-core-2.17.2.jar:\
-./target/classes:target/dependency/jackson-databind-2.17.2.jar:\
-./target/classes:target/dependency/jackson-datatype-jsr310-2.17.2.jar\
- ch.m1m.infra.config.example.ConfigExampleClient
-
+java -cp ".:./target/classes:./target/dependency/*" ch.m1m.infra.config.example.ConfigExampleClient
 ```
 
 

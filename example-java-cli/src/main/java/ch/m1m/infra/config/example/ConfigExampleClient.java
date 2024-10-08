@@ -32,7 +32,6 @@ public class ConfigExampleClient {
         configMap.put(Config.CONFIG_POLL_DURATION_SECONDS, "10");
 
         // this will be an application Singleton
-        // Config config = new Config(configUrl, domain, application);
         Config config = new Config(configMap);
 
         ConfigExampleClient program = new ConfigExampleClient(config);
@@ -50,9 +49,7 @@ public class ConfigExampleClient {
 
     public void run() {
         while(true) {
-            //System.out.println("current value is: " + key1.get());
             log.info("current value is: {}", key1.get());
-
             try {
                 TimeUnit.SECONDS.sleep(1);
             } catch (InterruptedException ie) {

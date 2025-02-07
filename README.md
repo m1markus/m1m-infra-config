@@ -125,10 +125,34 @@ Congratulation your done with the setup. You can now setup your server on a diff
     <artifactId>m1m-infra-config-client</artifactId>
     <version>1.0.0-SNAPSHOT</version>
 </dependency>
+```
+Note: It's not avalable on maven central
+
+## Security
+
+There is only one endpoint that is secured right now using
+traditional HTTP Basic Authentication
 
 ```
+http://localhost:8080/hello
+```
+User: admin
+Password: admin
+Role: admin
 
-Note: It's not avalable on maven central
+admin:admin as Base64 String is: YWRtaW46YWRtaW4=
+
+In the HTTP Header you send 
+```
+Authorization: Basic YWRtaW46YWRtaW4= 
+```
+to access the /hello endpoint.
+
+### Using CURL
+
+```
+curl -u admin:admin http://localhost:8080/hello
+```
 
 ## Using the client library
 
@@ -152,6 +176,8 @@ https://quarkus.io/blog/mutiny-invoke-and-call/
 Optimise the client lib, to compare old value with the received actual value. Call the "update" method only if the value is different.
 
 OpenAPI documentation
+
+
 
 ## What you get...
 
